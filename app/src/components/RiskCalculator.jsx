@@ -12,6 +12,20 @@ export default function RiskCalculator() {
   const [stop, setStop] = useState("");
   const [rr, setRr] = useState("2");
   const [symbol, setSymbol] = useState("XAUUSD");
+  const [copied, setCopied] = useState(false);
+
+  const copyLotSize = async () => {
+  if (!results?.lotSize) return;
+
+  try {
+    await navigator.clipboard.writeText(String(results.lotSize));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  } catch {
+    alert("Copy failed");
+  }
+};
+
 
   const results = useMemo(() => {
     const base = calculateRisk({
@@ -192,9 +206,29 @@ export default function RiskCalculator() {
           <div className="muted">Direction: {results.direction}</div>
 
           <div>
-            <div className="muted">Recommended Lot Size</div>
-            <div className="big">{results.lotSize}</div>
-          </div>
+  <div className="muted">Recommended Lot Size</div>
+
+  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <div className="big">{results.lotSize}</div>
+
+    <button
+      type="button"
+      onClick={copyLotSize}
+      style={{
+        padding: "6px 10px",
+        borderRadius: 8,
+        border: "1px solid #e5e7eb",
+        background: copied ? "#16a34a" : "#fff",
+        color: copied ? "#fff" : "#111827",
+        cursor: "pointer",
+        fontSize: 14,
+      }}
+    >
+      {copied ? "Copied ✓" : "Copy"}
+    </button>
+  </div>
+</div>
+
 
           <div>
             <div className="muted">Total £ Risk</div>
