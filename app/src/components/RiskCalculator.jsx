@@ -3,7 +3,11 @@ import { SYMBOLS } from "../constants/symbols";
 import { calculateRisk } from "../utils/calculateRisk";
 import "../App.css";
 
+/* ===== SIMPLE PRO CONFIG ===== */
+const PRO_CODE = "ALANPRO10"; // change this before selling
+
 export default function RiskCalculator() {
+  /* ---------- State ---------- */
   const [balance, setBalance] = useState("");
   const [riskPercent, setRiskPercent] = useState("");
   const [riskCash, setRiskCash] = useState("");
@@ -13,14 +17,21 @@ export default function RiskCalculator() {
   const [rr, setRr] = useState("2");
   const [symbol, setSymbol] = useState("XAUUSD");
 
+  const [isPro, setIsPro] = useState(
+    () => localStorage.getItem("isPro") === "true"
+  );
+  const [unlockCode, setUnlockCode] = useState("");
+  const [unlockError, setUnlockError] = useState("");
+
   const [lotCopied, setLotCopied] = useState(false);
   const [tpCopied, setTpCopied] = useState(false);
 
+  /* ---------- Calculations ---------- */
   const results = useMemo(() => {
     const e = Number(entry);
     const s = Number(stop);
 
-    // While typing, entry/stop can be "" -> NaN. Avoid any calculations until valid.
+    // Avoid crashes while typing
     if (!isFinite(e) || !isFinite(s) || e === s) return null;
 
     const base = calculateRisk({
@@ -41,7 +52,10 @@ export default function RiskCalculator() {
     const takeProfit =
       isFinite(rrNum) && rrNum > 0
         ? Number(
-            (isLong ? e + riskDistance * rrNum : e - riskDistance * rrNum).toFixed(2)
+            (isLong
+              ? e + riskDistance * rrNum
+              : e - riskDistance * rrNum
+            ).toFixed(2)
           )
         : null;
 
@@ -50,15 +64,24 @@ export default function RiskCalculator() {
       takeProfit,
       direction: isLong ? "BUY (Long)" : "SELL (Short)",
     };
-  }, [balance, riskPercent, riskCash, riskMode, entry, stop, rr, symbol]);
+  }, [
+    balance,
+    riskPercent,
+    riskCash,
+    riskMode,
+    entry,
+    stop,
+    rr,
+    symbol,
+  ]);
 
+  /* ---------- Helpers ---------- */
   const copyText = async (text, setter) => {
     try {
       await navigator.clipboard.writeText(String(text));
       setter(true);
       setTimeout(() => setter(false), 1500);
     } catch {
-      // Fallback for environments where clipboard API is blocked
       window.prompt("Copy this value:", String(text));
     }
   };
@@ -73,7 +96,6 @@ export default function RiskCalculator() {
     copyText(results.takeProfit, setTpCopied);
   };
 
-  // One-tap lot presets: compute required £ risk for the chosen lot
   const setPresetLot = (lot) => {
     const e = Number(entry);
     const s = Number(stop);
@@ -81,7 +103,6 @@ export default function RiskCalculator() {
 
     const distance = Math.abs(e - s);
     const valuePerPoint = SYMBOLS[symbol].valuePerPoint;
-
     const cash = lot * distance * valuePerPoint;
 
     setRiskMode("cash");
@@ -89,6 +110,18 @@ export default function RiskCalculator() {
     setRiskCash(String(Number(cash.toFixed(2))));
   };
 
+  const handleUnlock = () => {
+    setUnlockError("");
+    if (unlockCode.trim().toUpperCase() === PRO_CODE) {
+      localStorage.setItem("isPro", "true");
+      setIsPro(true);
+      setUnlockCode("");
+    } else {
+      setUnlockError("Invalid code. Check spelling and try again.");
+    }
+  };
+
+  /* ---------- UI ---------- */
   return (
     <div className="container">
       <div className="title">Trading Risk Calculator</div>
@@ -112,7 +145,7 @@ export default function RiskCalculator() {
             }}
             style={{
               flex: 1,
-              padding: "10px 12px",
+              padding: "10px",
               borderRadius: 10,
               border: "1px solid #e5e7eb",
               background: riskMode === "percent" ? "#111827" : "#fff",
@@ -131,7 +164,7 @@ export default function RiskCalculator() {
             }}
             style={{
               flex: 1,
-              padding: "10px 12px",
+              padding: "10px",
               borderRadius: 10,
               border: "1px solid #e5e7eb",
               background: riskMode === "cash" ? "#111827" : "#fff",
@@ -168,7 +201,6 @@ export default function RiskCalculator() {
                       background: active ? "#111827" : "#fff",
                       color: active ? "#fff" : "#111827",
                       cursor: "pointer",
-                      fontSize: 14,
                     }}
                   >
                     {val}%
@@ -224,30 +256,72 @@ export default function RiskCalculator() {
         />
       </div>
 
+      {/* Unlock Pro */}
+      {!isPro && (
+        <div className="results">
+          <div className="muted">
+            <strong>Pro features:</strong> Copy buttons & lot presets
+          </div>
+
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              className="input"
+              placeholder="Enter Pro code"
+              value={unlockCode}
+              onChange={(e) => setUnlockCode(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={handleUnlock}
+              style={{
+                padding: "10px 12px",
+                borderRadius: 10,
+                border: "1px solid #e5e7eb",
+                background: "#111827",
+                color: "#fff",
+                cursor: "pointer",
+                fontWeight: 700,
+              }}
+            >
+              Unlock
+            </button>
+          </div>
+
+          {unlockError && (
+            <div className="muted" style={{ color: "#b91c1c" }}>
+              {unlockError}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Results */}
       {results ? (
         <div className="results">
           <div className="muted">Direction: {results.direction}</div>
 
-          {/* Lot size + copy */}
           <div>
             <div className="muted">Recommended Lot Size</div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <div className="big">{results.lotSize}</div>
-              <button
-                type="button"
-                onClick={copyLotSize}
-                style={{
-                  padding: "6px 10px",
-                  borderRadius: 8,
-                  border: "1px solid #e5e7eb",
-                  background: lotCopied ? "#16a34a" : "#fff",
-                  color: lotCopied ? "#fff" : "#111827",
-                  cursor: "pointer",
-                  fontSize: 14,
-                }}
-              >
-                {lotCopied ? "Copied ✓" : "Copy"}
-              </button>
+              {isPro ? (
+                <button
+                  type="button"
+                  onClick={copyLotSize}
+                  style={{
+                    padding: "6px 10px",
+                    borderRadius: 8,
+                    border: "1px solid #e5e7eb",
+                    background: lotCopied ? "#16a34a" : "#fff",
+                    color: lotCopied ? "#fff" : "#111827",
+                    cursor: "pointer",
+                  }}
+                >
+                  {lotCopied ? "Copied ✓" : "Copy"}
+                </button>
+              ) : (
+                <span className="muted">Pro</span>
+              )}
             </div>
           </div>
 
@@ -261,54 +335,54 @@ export default function RiskCalculator() {
             <div>{results.distance}</div>
           </div>
 
-          {/* TP + copy */}
           <div>
             <div className="muted">Take Profit (from RR)</div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <div className="big">{results.takeProfit ?? "—"}</div>
-              <button
-                type="button"
-                onClick={copyTakeProfit}
-                disabled={results.takeProfit == null}
-                style={{
-                  padding: "6px 10px",
-                  borderRadius: 8,
-                  border: "1px solid #e5e7eb",
-                  background: tpCopied ? "#16a34a" : "#fff",
-                  color: tpCopied ? "#fff" : "#111827",
-                  cursor: results.takeProfit == null ? "not-allowed" : "pointer",
-                  fontSize: 14,
-                  opacity: results.takeProfit == null ? 0.5 : 1,
-                }}
-              >
-                {tpCopied ? "Copied ✓" : "Copy"}
-              </button>
+              {isPro && results.takeProfit != null && (
+                <button
+                  type="button"
+                  onClick={copyTakeProfit}
+                  style={{
+                    padding: "6px 10px",
+                    borderRadius: 8,
+                    border: "1px solid #e5e7eb",
+                    background: tpCopied ? "#16a34a" : "#fff",
+                    color: tpCopied ? "#fff" : "#111827",
+                    cursor: "pointer",
+                  }}
+                >
+                  {tpCopied ? "Copied ✓" : "Copy"}
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Lot presets */}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {[0.01, 0.02, 0.05, 0.1].map((lot) => (
-              <button
-                key={lot}
-                type="button"
-                onClick={() => setPresetLot(lot)}
-                style={{
-                  padding: "8px 12px",
-                  borderRadius: 10,
-                  border: "1px solid #e5e7eb",
-                  background: "#fff",
-                  cursor: "pointer",
-                  fontSize: 14,
-                }}
-              >
-                Set {lot.toFixed(2)} lot
-              </button>
-            ))}
-          </div>
-          <div className="muted">
-            Tap a lot preset to auto-fill the £ risk for your current entry/stop.
-          </div>
+          {isPro && (
+            <>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {[0.01, 0.02, 0.05, 0.1].map((lot) => (
+                  <button
+                    key={lot}
+                    type="button"
+                    onClick={() => setPresetLot(lot)}
+                    style={{
+                      padding: "8px 12px",
+                      borderRadius: 10,
+                      border: "1px solid #e5e7eb",
+                      background: "#fff",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Set {lot.toFixed(2)} lot
+                  </button>
+                ))}
+              </div>
+              <div className="muted">
+                Tap a lot preset to auto-fill the £ risk.
+              </div>
+            </>
+          )}
         </div>
       ) : (
         <div className="muted">
