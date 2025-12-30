@@ -6,15 +6,18 @@ import "../App.css";
 export default function RiskCalculator() {
   const [balance, setBalance] = useState("");
   const [riskPercent, setRiskPercent] = useState("");
+  const [riskCash, setRiskCash] = useState("");
+  const [riskMode, setRiskMode] = useState("percent"); // percent | cash
   const [entry, setEntry] = useState("");
   const [stop, setStop] = useState("");
-  const [symbol, setSymbol] = useState("XAUUSD");
   const [rr, setRr] = useState("2");
+  const [symbol, setSymbol] = useState("XAUUSD");
 
   const results = useMemo(() => {
     const base = calculateRisk({
       balance: Number(balance),
-      riskPercent: Number(riskPercent),
+      riskPercent: riskMode === "percent" ? Number(riskPercent) : 0,
+      riskAmountOverride: riskMode === "cash" ? Number(riskCash) : null,
       entry: Number(entry),
       stop: Number(stop),
       valuePerPoint: SYMBOLS[symbol].valuePerPoint,
@@ -32,34 +35,119 @@ export default function RiskCalculator() {
 
     const riskDistance = Math.abs(e - s);
     const isLong = e > s;
+
     const takeProfit = isLong
       ? e + riskDistance * rrNum
       : e - riskDistance * rrNum;
 
-    return { ...base, takeProfit: Number(takeProfit.toFixed(2)) };
-  }, [balance, riskPercent, entry, stop, symbol, rr]);
+    return {
+      ...base,
+      takeProfit: Number(takeProfit.toFixed(2)),
+      direction: isLong ? "BUY (Long)" : "SELL (Short)",
+    };
+  }, [balance, riskPercent, riskCash, riskMode, entry, stop, rr, symbol]);
 
   return (
     <div className="container">
       <div className="title">Trading Risk Calculator</div>
 
       <div className="card">
+        {/* Balance */}
         <input
           className="input"
-          placeholder="Balance (£)"
+          placeholder="Account Balance (£)"
           type="number"
           value={balance}
           onChange={(e) => setBalance(e.target.value)}
         />
 
-        <input
-          className="input"
-          placeholder="Risk %"
-          type="number"
-          value={riskPercent}
-          onChange={(e) => setRiskPercent(e.target.value)}
-        />
+        {/* Risk mode toggle */}
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            type="button"
+            onClick={() => {
+              setRiskMode("percent");
+              setRiskCash("");
+            }}
+            style={{
+              flex: 1,
+              padding: "10px 12px",
+              borderRadius: 10,
+              border: "1px solid #e5e7eb",
+              background: riskMode === "percent" ? "#111827" : "#fff",
+              color: riskMode === "percent" ? "#fff" : "#111827",
+              cursor: "pointer",
+            }}
+          >
+            Risk %
+          </button>
 
+          <button
+            type="button"
+            onClick={() => {
+              setRiskMode("cash");
+              setRiskPercent("");
+            }}
+            style={{
+              flex: 1,
+              padding: "10px 12px",
+              borderRadius: 10,
+              border: "1px solid #e5e7eb",
+              background: riskMode === "cash" ? "#111827" : "#fff",
+              color: riskMode === "cash" ? "#fff" : "#111827",
+              cursor: "pointer",
+            }}
+          >
+            Risk £
+          </button>
+        </div>
+
+        {/* Risk inputs */}
+        {riskMode === "percent" ? (
+          <>
+            <input
+              className="input"
+              placeholder="Risk %"
+              type="number"
+              value={riskPercent}
+              onChange={(e) => setRiskPercent(e.target.value)}
+            />
+
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {[0.25, 0.5, 1, 2].map((val) => {
+                const active = Number(riskPercent) === val;
+                return (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => setRiskPercent(String(val))}
+                    style={{
+                      padding: "8px 12px",
+                      borderRadius: 10,
+                      border: "1px solid #e5e7eb",
+                      background: active ? "#111827" : "#fff",
+                      color: active ? "#fff" : "#111827",
+                      cursor: "pointer",
+                      fontSize: 14,
+                    }}
+                  >
+                    {val}%
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <input
+            className="input"
+            placeholder="Risk Amount (£)"
+            type="number"
+            value={riskCash}
+            onChange={(e) => setRiskCash(e.target.value)}
+          />
+        )}
+
+        {/* Symbol */}
         <select
           className="input"
           value={symbol}
@@ -72,6 +160,7 @@ export default function RiskCalculator() {
           ))}
         </select>
 
+        {/* Entry / Stop / RR */}
         <input
           className="input"
           placeholder="Entry Price"
@@ -97,8 +186,11 @@ export default function RiskCalculator() {
         />
       </div>
 
+      {/* Results */}
       {results ? (
         <div className="results">
+          <div className="muted">Direction: {results.direction}</div>
+
           <div>
             <div className="muted">Recommended Lot Size</div>
             <div className="big">{results.lotSize}</div>
@@ -116,11 +208,13 @@ export default function RiskCalculator() {
 
           <div>
             <div className="muted">Take Profit (from RR)</div>
-            <div>{results.takeProfit ?? "—"}</div>
+            <div className="big">{results.takeProfit ?? "—"}</div>
           </div>
         </div>
       ) : (
-        <div className="muted">Enter valid values to calculate</div>
+        <div className="muted">
+          Enter balance, risk, entry and stop (entry ≠ stop)
+        </div>
       )}
     </div>
   );
