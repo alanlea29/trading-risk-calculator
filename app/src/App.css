@@ -324,3 +324,74 @@ p {
   color: #6b7280;
   text-decoration: none;
 }
+.tvWrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.tvHeader {
+  margin-bottom: 1rem;
+}
+
+.tvGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .tvGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tvCalendar {
+  margin-top: 2rem;
+}
+/* ================================
+   Calculator + Gold Market Layout
+   ================================ */
+
+.calcMarketWrap {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* Right-hand market panel */
+.marketPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.marketTitle {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.marketSub {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+.marketBlock {
+  background: #0f172a;
+  border-radius: 12px;
+  padding: 0.5rem;
+  overflow: hidden;
+}
+
+/* Mobile stacking */
+@media (max-width: 1000px) {
+  .calcMarketWrap {
+    grid-template-columns: 1fr;
+  }
+}

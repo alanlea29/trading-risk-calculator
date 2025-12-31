@@ -1,9 +1,13 @@
-import RiskCalculator from "./components/RiskCalculator";
 import "./App.css";
 
-export default function App() {
+import GoldChart from "./components/GoldChart";
+import EconCalendar from "./components/EconCalendar";
+import RiskCalculator from "./components/RiskCalculator";
+
+function App() {
   return (
     <div className="page">
+      {/* HEADER */}
       <header className="header">
         <div className="brand">
           <div className="logo">RC</div>
@@ -19,6 +23,7 @@ export default function App() {
       </header>
 
       <main className="main">
+        {/* HERO */}
         <section className="hero">
           <h1 className="heroTitle">Trading Risk Calculator</h1>
           <p className="heroSub">
@@ -39,27 +44,16 @@ export default function App() {
 
             <a
               className="btnSecondary"
-              href="alanlea.gumroad.com/l/bkrsef"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Unlock Pro (£9.99)
-             <a
               href="https://alanlea.gumroad.com/l/bkrsef"
               target="_blank"
               rel="noopener noreferrer"
-              className="cta-pro"
             >
-              🔓 Unlock Pro
-</a>
-
-
+              🔓 Unlock Pro (£9.99)
             </a>
-            </div>
-
-
+          </div>
         </section>
 
+        {/* FEATURES */}
         <section className="grid">
           <div className="card2">
             <div className="cardTitle">Risk by % or £</div>
@@ -86,14 +80,36 @@ export default function App() {
           </div>
         </section>
 
-        <section id="calculator" className="calcWrap">
-          <div className="calcHeader">
-            <h2 className="calcTitle">Calculator</h2>
-            <p className="calcSub">Enter your trade details — results update instantly.</p>
+        {/* === CALCULATOR + GOLD MARKET INLINE === */}
+        <section className="calcMarketWrap">
+          {/* LEFT: Calculator */}
+          <div id="calculator" className="calcWrap">
+            <div className="calcHeader">
+              <h2 className="calcTitle">Calculator</h2>
+              <p className="calcSub">
+                Enter your trade details — results update instantly.
+              </p>
+            </div>
+
+            <RiskCalculator />
           </div>
-          <RiskCalculator />
+
+          {/* RIGHT: Gold market */}
+          <aside className="marketPanel">
+            <h3 className="marketTitle">Gold Market</h3>
+
+            <div className="marketBlock">
+              <GoldChart />
+            </div>
+
+            <div className="marketBlock">
+              <h4 className="marketSub">Economic Calendar (USD)</h4>
+              <EconCalendar />
+            </div>
+          </aside>
         </section>
 
+        {/* HOW IT WORKS */}
         <section id="how" className="how">
           <h2 className="howTitle">How it works</h2>
           <ol className="howList">
@@ -104,26 +120,29 @@ export default function App() {
           </ol>
 
           <div className="disclaimer">
-            <strong>Disclaimer:</strong> This tool is for educational purposes only. Trading
-            involves risk. Always double-check your broker’s contract specs.
+            <strong>Disclaimer:</strong> This tool is for educational purposes only.
+            Trading involves risk. Always double-check your broker’s contract specs.
           </div>
         </section>
       </main>
 
+      {/* FOOTER */}
       <footer className="footer">
         <div>© {new Date().getFullYear()} RiskCalc</div>
         <div className="footerLinks">
           <a href="#calculator">Calculator</a>
           <a href="#how">How it works</a>
-          <a href="https://alanlea.gumroad.com/l/bkrsef"
-             target="_blank"
-             rel="noopener noreferrer"
->
-  Unlock Pro
-</a>
-
+          <a
+            href="https://alanlea.gumroad.com/l/bkrsef"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Unlock Pro
+          </a>
         </div>
       </footer>
     </div>
   );
 }
+
+export default App;
