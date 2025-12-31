@@ -114,12 +114,13 @@ export default function App() {
         <div className="footerLinks">
           <a href="#calculator">Calculator</a>
           <a href="#how">How it works</a>
-          <ahref="https://YOURNAME.gumroad.com/l/riskcalc-pro"
-          target="_blank"
-          rel="noopener noreferrer"
-          >
-            Unlock Pro
-          </a>
+          <a href="https://alanlea.gumroad.com/l/bkrsef"
+             target="_blank"
+             rel="noopener noreferrer"
+>
+  Unlock Pro
+</a>
+
         </div>
       </footer>
     </div>
