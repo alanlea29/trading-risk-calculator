@@ -44,14 +44,15 @@ export default function App() {
               rel="noopener noreferrer"
             >
               Unlock Pro (£9.99)
-              <a
-                href="alanlea.gumroad.com/l/bkrsef"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="muted"
-              >
-              Buy Pro (£9.99 lifetime)
-              </a>
+             <a
+              href="https://alanlea.gumroad.com/l/bkrsef"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cta-pro"
+            >
+              🔓 Unlock Pro
+</a>
+
 
             </a>
             </div>
