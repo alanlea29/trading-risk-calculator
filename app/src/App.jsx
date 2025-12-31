@@ -36,10 +36,27 @@ export default function App() {
             <a className="btnPrimary" href="#calculator">
               Use the Calculator
             </a>
-            <a className="btnSecondary" href="#how">
-              How it works
+
+            <a
+              className="btnSecondary"
+              href="alanlea.gumroad.com/l/bkrsef"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Unlock Pro (£9.99)
+              <a
+                href="alanlea.gumroad.com/l/bkrsef"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="muted"
+              >
+              Buy Pro (£9.99 lifetime)
+              </a>
+
             </a>
-          </div>
+            </div>
+
+
         </section>
 
         <section className="grid">
@@ -97,6 +114,12 @@ export default function App() {
         <div className="footerLinks">
           <a href="#calculator">Calculator</a>
           <a href="#how">How it works</a>
+          <ahref="https://YOURNAME.gumroad.com/l/riskcalc-pro"
+          target="_blank"
+          rel="noopener noreferrer"
+          >
+            Unlock Pro
+          </a>
         </div>
       </footer>
     </div>
